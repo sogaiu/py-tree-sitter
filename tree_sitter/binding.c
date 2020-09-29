@@ -130,6 +130,30 @@ static PyObject *node_chield_by_field_name(Node *self, PyObject *args) {
   return node_new_internal(child, self->tree);
 }
 
+static PyObject *node_first_child_for_byte(Node *self, PyObject *args) {
+  uint32_t offset;
+  if (!PyArg_ParseTuple(args, "I", &offset)) {
+    return NULL;
+  }
+  TSNode child = ts_node_first_child_for_byte(self->node, offset);
+  if (ts_node_is_null(child)) {
+    Py_RETURN_NONE;
+  }
+  return node_new_internal(child, self->tree);
+}
+
+static PyObject *node_first_named_child_for_byte(Node *self, PyObject *args) {
+  uint32_t offset;
+  if (!PyArg_ParseTuple(args, "I", &offset)) {
+    return NULL;
+  }
+  TSNode child = ts_node_first_named_child_for_byte(self->node, offset);
+  if (ts_node_is_null(child)) {
+    Py_RETURN_NONE;
+  }
+  return node_new_internal(child, self->tree);
+}
+
 static PyObject *node_get_type(Node *self, void *payload) {
   return PyUnicode_FromString(ts_node_type(self->node));
 }
@@ -271,6 +295,20 @@ static PyMethodDef node_methods[] = {
     .ml_flags = METH_VARARGS,
     .ml_doc = "child_by_field_name(name)\n--\n\n\
                Get child for the given field name.",
+  },
+  {
+    .ml_name = "first_child_for_byte",
+    .ml_meth = (PyCFunction)node_first_child_for_byte,
+    .ml_flags = METH_VARARGS,
+    .ml_doc = "first_child_for_byte(offset)\n--\n\n\
+               Returns the first child that extends beyond the given byte offset.",
+  },
+  {
+    .ml_name = "first_named_child_for_byte",
+    .ml_meth = (PyCFunction)node_first_named_child_for_byte,
+    .ml_flags = METH_VARARGS,
+    .ml_doc = "first_named_child_for_byte(offset)\n--\n\n\
+               Returns the first named child that extends beyond the given byte offset.",
   },
   {NULL},
 };
