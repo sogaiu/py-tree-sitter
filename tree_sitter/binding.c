@@ -154,6 +154,32 @@ static PyObject *node_first_named_child_for_byte(Node *self, PyObject *args) {
   return node_new_internal(child, self->tree);
 }
 
+static PyObject *node_descendant_for_byte_range(Node *self, PyObject *args) {
+  uint32_t start;
+  uint32_t end;
+  if (!PyArg_ParseTuple(args, "II", &start, &end)) {
+    return NULL;
+  }
+  TSNode child = ts_node_descendant_for_byte_range(self->node, start, end);
+  if (ts_node_is_null(child)) {
+    Py_RETURN_NONE;
+  }
+  return node_new_internal(child, self->tree);
+}
+
+static PyObject *node_named_descendant_for_byte_range(Node *self, PyObject *args) {
+  uint32_t start;
+  uint32_t end;
+  if (!PyArg_ParseTuple(args, "II", &start, &end)) {
+    return NULL;
+  }
+  TSNode child = ts_node_named_descendant_for_byte_range(self->node, start, end);
+  if (ts_node_is_null(child)) {
+    Py_RETURN_NONE;
+  }
+  return node_new_internal(child, self->tree);
+}
+
 static PyObject *node_get_type(Node *self, void *payload) {
   return PyUnicode_FromString(ts_node_type(self->node));
 }
@@ -309,6 +335,20 @@ static PyMethodDef node_methods[] = {
     .ml_flags = METH_VARARGS,
     .ml_doc = "first_named_child_for_byte(offset)\n--\n\n\
                Returns the first named child that extends beyond the given byte offset.",
+  },
+  {
+    .ml_name = "descendant_for_byte_range",
+    .ml_meth = (PyCFunction)node_descendant_for_byte_range,
+    .ml_flags = METH_VARARGS,
+    .ml_doc = "descendant_for_byte_range(start, end)\n--\n\n\
+               Returns the smallest node that spans the given byte offsets.",
+  },
+  {
+    .ml_name = "named_descendant_for_byte_range",
+    .ml_meth = (PyCFunction)node_named_descendant_for_byte_range,
+    .ml_flags = METH_VARARGS,
+    .ml_doc = "named_descendant_for_byte_range(start, end)\n--\n\n\
+               Returns the smallest named node that spans the given byte offsets.",
   },
   {NULL},
 };
